@@ -1,2 +1,1 @@
-# Ciocan-Andrei
-Practica anul II
+# Practica anul II

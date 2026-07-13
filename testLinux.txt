@@ -1,1 +1,1 @@
-Conectare de pe Linux partea 2
+setare cu ssh

@@ -1,0 +1,2 @@
+start verificare checksum pentru directorul /home/andy/Desktop/sync_test/
+start verificare checksum pentru directorul /home/andy/Desktop/sync_test/

@@ -12,5 +12,5 @@ if [ $? -eq 0 ]; then
     echo "cron deja setat"
 else
     (crontab -l 2>/dev/null; echo "*/$INTERVAL * * * * $SCRIPT_PATH") | crontab -
-    echo "cron setat cu succes"
+    echo "cron setat pentru $INTERVAL minute"
 fi

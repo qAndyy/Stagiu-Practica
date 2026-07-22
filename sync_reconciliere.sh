@@ -22,9 +22,11 @@ for SLAVE in "${SLAVES[@]}"; do
                 echo "diferenta detectata"
                 scp "$FISIER" "${SLAVE}:${DIR_REMOTE}${NUME_FISIER}.tmp"
                 
-                IN_USE=$(ssh "$SLAVE" "lsof ${DIR_REMOTE}${NUME_FISIER} 2>/dev/null | wc -l")
-                if [ "$IN_USE" -eq 0 ]; then
-                    ssh "$SLAVE" "mv ${DIR_REMOTE}${NUME_FISIER}.tmp ${DIR_REMOTE}${NUME_FISIER}"
+                if [ $? -eq 0 ]; then
+                    IN_USE=$(ssh "$SLAVE" "lsof ${DIR_REMOTE}${NUME_FISIER} 2>/dev/null | wc -l")
+                    if [ "$IN_USE" -eq 0 ]; then
+                        ssh "$SLAVE" "mv ${DIR_REMOTE}${NUME_FISIER}.tmp ${DIR_REMOTE}${NUME_FISIER}"
+                    fi
                 fi
             fi
         fi

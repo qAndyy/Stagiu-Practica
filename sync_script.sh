@@ -1,29 +1,27 @@
 #!/bin/bash
+source setari.conf
 
-source /home/andy/Desktop/Stagiu-Practica/setari.conf
-
-echo "start sync pt directorul $DIR_LOCAL"
-
-inotifywait -m -r -e close_write,create "$DIR_LOCAL" --format "%w%f" | while read FISIER_MODIFICAT; do
-
-    NUME_FISIER=$(basename "$FISIER_MODIFICAT")
-    echo "Fisier modificat: $NUME_FISIER"
+inotifywait -m -e close_write,create,delete --format '%w%f %e' "$DIR_LOCAL" | while read -r FISIER EVENT
+do
+    NUME_FISIER=$(basename "$FISIER")
     
-    FISIER_TEMPORAR="${NUME_FISIER}.tmp"
-    
-    for SLAVE in "${SLAVES[@]}"; do
-        ssh -n "${SLAVE}" "mkdir -p \"${DIR_REMOTE}\""
-        
-        scp -q "$FISIER_MODIFICAT" "${SLAVE}:\"${DIR_REMOTE}${FISIER_TEMPORAR}\""
-        
-        STATUS_LSOF=$(ssh -n "${SLAVE}" "lsof \"${DIR_REMOTE}${NUME_FISIER}\" > /dev/null 2>&1; echo \$?")
-        
-        if [ "$STATUS_LSOF" -eq 1 ]; then
-            ssh -n "${SLAVE}" "mv \"${DIR_REMOTE}${FISIER_TEMPORAR}\" \"${DIR_REMOTE}${NUME_FISIER}\""
-            echo "copiere finalizata cu succes pe $SLAVE"
-        else
-            echo "fisierul e deschis pe $SLAVE"
-        fi
-    done
-
+    if [[ "$EVENT" == *"DELETE"* ]]; then
+        for SLAVE in "${SLAVES[@]}"; do
+            ssh "$SLAVE" "rm -f ${DIR_REMOTE}${NUME_FISIER}"
+        done
+    else
+        echo "Fisier modificat: $NUME_FISIER"
+        for SLAVE in "${SLAVES[@]}"; do
+            scp "${DIR_LOCAL}${NUME_FISIER}" "${SLAVE}:${DIR_REMOTE}${NUME_FISIER}.tmp"
+            
+            IN_USE=$(ssh "$SLAVE" "lsof ${DIR_REMOTE}${NUME_FISIER} 2>/dev/null | wc -l")
+            
+            if [ "$IN_USE" -eq 0 ]; then
+                ssh "$SLAVE" "mv ${DIR_REMOTE}${NUME_FISIER}.tmp ${DIR_REMOTE}${NUME_FISIER}"
+                echo "copiere finalizata cu succes pe $SLAVE"
+            else
+                echo "fisierul e deschis pe $SLAVE"
+            fi
+        done
+    fi
 done

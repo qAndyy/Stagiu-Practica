@@ -1,9 +1,5 @@
 #!/bin/bash
+SCRIPT_PATH="$(pwd)/sync_reconciliere.sh"
 
-SCRIPT_RECONCILIERE="sync_reconciliere.sh"
-
-echo "oprire cron pt $SCRIPT_RECONCILIERE"
-
-crontab -l 2>/dev/null | grep -v "$SCRIPT_RECONCILIERE" | crontab -
-
+crontab -l 2>/dev/null | grep -v "$SCRIPT_PATH" | crontab -
 echo "cron oprit cu succes"

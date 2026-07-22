@@ -1,17 +1,16 @@
 #!/bin/bash
 
-SCRIPT_RECONCILIERE="/home/andy/Desktop/Stagiu-Practica/sync_reconciliere.sh"
-INTERVAL="${1:-10}"
+INTERVAL=$1
+if [ -z "$INTERVAL" ]; then
+    INTERVAL=10
+fi
 
-echo "setare cron la $INTERVAL minute pt $SCRIPT_RECONCILIERE"
+SCRIPT_PATH="$(pwd)/sync_reconciliere.sh"
 
-chmod +x "$SCRIPT_RECONCILIERE"
-
-crontab -l 2>/dev/null | grep -q "$SCRIPT_RECONCILIERE"
-
+crontab -l 2>/dev/null | grep -q "$SCRIPT_PATH"
 if [ $? -eq 0 ]; then
     echo "cron deja setat"
 else
-    (crontab -l 2>/dev/null; echo "*/$INTERVAL * * * * $SCRIPT_RECONCILIERE") | crontab -
-    echo "cron setat cu succes la $INTERVAL minute"
+    (crontab -l 2>/dev/null; echo "*/$INTERVAL * * * * $SCRIPT_PATH") | crontab -
+    echo "cron setat cu succes"
 fi

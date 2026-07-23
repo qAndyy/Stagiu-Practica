@@ -8,13 +8,19 @@ for SLAVE in "${SLAVES[@]}"; do
         continue
     fi
 
-    ssh "$SLAVE" "ls -1 \"$DIR_REMOTE\"" 2>/dev/null | while read -r FISIER_R; do
-        if [ -n "$FISIER_R" ] && [[ "$FISIER_R" != *.tmp ]]; then
-            if [ ! -f "${DIR_LOCAL}${FISIER_R}" ]; then
-                ssh "$SLAVE" "rm -f \"${DIR_REMOTE}${FISIER_R}\"" 2>/dev/null
+    ssh "$SLAVE" "ls -1 \"$DIR_REMOTE\"" 2>/dev/null | {
+        FISIERE_DE_STERS=""
+        while read -r FISIER_R; do
+            if [ -n "$FISIER_R" ] && [[ "$FISIER_R" != *.tmp ]]; then
+                if [ ! -f "${DIR_LOCAL}${FISIER_R}" ]; then
+                    FISIERE_DE_STERS+=" \"${DIR_REMOTE}${FISIER_R}\""
+                fi
             fi
+        done
+        if [ -n "$FISIERE_DE_STERS" ]; then
+            ssh "$SLAVE" "rm -f$FISIERE_DE_STERS" 2>/dev/null
         fi
-    done
+    }
 
     for FISIER in "${DIR_LOCAL}"*; do
         if [ -f "$FISIER" ]; then

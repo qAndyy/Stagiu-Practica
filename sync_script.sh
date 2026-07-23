@@ -3,11 +3,18 @@ source setari.conf
 
 inotifywait -m -e close_write,create,delete --format '%e %f' "$DIR_LOCAL" | while read -r EVENT NUME_FISIER
 do
+    if [[ "$NUME_FISIER" == .* ]]; then
+        continue
+    fi
+
     if [[ "$EVENT" == *"DELETE"* ]]; then
         echo "fisier sters local: $NUME_FISIER"
         for SLAVE in "${SLAVES[@]}"; do
             ssh "$SLAVE" "rm -f \"${DIR_REMOTE}${NUME_FISIER}\"" 2>/dev/null
-            echo "sters si de pe $SLAVE"
+            
+            if [ $? -eq 0 ]; then
+                echo "sters si de pe $SLAVE"
+            fi
         done
     else
         echo "Fisier modificat: $NUME_FISIER"
